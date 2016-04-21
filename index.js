@@ -3,7 +3,7 @@ var app = express();
 var path = require("path");
 var google = require('googleapis');
 var customsearch = google.customsearch('v1');
-var fs = require("fs");
+
 var mongodb = require('mongodb');
 
 app.set('port', (process.env.PORT || 5000));
@@ -17,7 +17,8 @@ app.get("/", function (req, res) {
 });
 //custom search API
 
-var uri = process.env.PROD_MONGODB;
+var uri = 'mongodb://romi103:casted12@ds013310.mlab.com:13310/heroku_j5p7jl9s';
+//var uri = process.env.PROD_MONGODB;
 
 app.get('/search/:se', function (req, res) {
 
@@ -30,7 +31,6 @@ app.get('/search/:se', function (req, res) {
         num: query,
         searchType: "image"
     };
-
 
     customsearch.cse.list(params, function (err, response) {
         if (err) {
@@ -50,9 +50,7 @@ app.get('/search/:se', function (req, res) {
 
                     if (err) throw err;
 
-                    var search = db.collection('search');
-
-                    search.insert(dataToDatbase);
+                    db.search.insert(dataToDatbase);
                 });
 
                 var json = [];
@@ -70,18 +68,26 @@ app.get('/search/:se', function (req, res) {
                     });
 
                 }
-
-            
             res.end(JSON.stringify(json));
-
-
-            //            res.end(JSON.stringify(response.items));
         }
     });
 });
 
 //getting search history
-app.get('/search/:se', function (req, res) {});
+app.get('/latest', function (req, res) {
+    
+      mongodb.MongoClient.connect(uri, function (err, db) {
+
+                    if (err) throw err;
+
+                     var d = db.search.find().limit(1);
+          
+                    res.send(d);
+                });
+    
+    
+    
+});
 
 
 
