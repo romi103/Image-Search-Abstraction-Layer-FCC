@@ -1,0 +1,25 @@
+{
+  "name": "image-search-abs-layer",
+  "version": "1.0.0",
+  "description": "Image Search Abstraction Layer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "Free",
+    "Code",
+    "Camp"
+  ],
+  "author": "Roman Lorent",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4",
+    "googleapis": "^5.0.0",
+    "mongodb": "^2.1.16"
+  }
+}
