@@ -36,38 +36,42 @@ app.get('/search/:se', function (req, res) {
         if (err) {
             res.send('Encountered error', err);
         } else {
-            
+
             console.log(uri);
-//            var d = new Data();
-//            var dataSearch = d.toUTCString();
+            //            var d = new Data();
+            //            var dataSearch = d.toUTCString();
             var dataToDatbase = {
                 term: request,
-                when: new Date().toUTCString()
+                when: new Date().toUTCString(),
+                unix: Date.now()
             };
 
             //database interaction
             mongodb.MongoClient.connect(uri, function (err, db) {
 
-                    if (err) throw err;
+                if (err) throw err;
+                console.log(dataToDatbase);
+                var search = db.collection('search');
 
-                    db.search.insert(dataToDatbase);
+                search.insert(dataToDatbase);
+                db.close();
+            });
+
+            var json = [];
+
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+
+            for (var i = 0; i < query; i++) {
+                json.push({
+                    url: response.items[i].link,
+                    snippet: response.items[i].snippet,
+                    thumbnail: response.items[i].image.thumbnailLink,
+                    context: response.items[i].image.contextLink
                 });
 
-                var json = [];
-
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-
-                for (var i = 0; i < query; i++) {
-                    json.push({
-                        url: response.items[i].link,
-                        snippet: response.items[i].snippet,
-                        thumbnail: response.items[i].image.thumbnailLink,
-                        context: response.items[i].image.contextLink
-                    });
-
-                }
+            }
             res.end(JSON.stringify(json));
         }
     });
@@ -75,18 +79,32 @@ app.get('/search/:se', function (req, res) {
 
 //getting search history
 app.get('/latest', function (req, res) {
-    
-      mongodb.MongoClient.connect(uri, function (err, db) {
 
-                    if (err) throw err;
+    mongodb.MongoClient.connect(uri, function (err, db) {
 
-                     var d = db.search.find().limit(1);
-          
-                    res.send(d);
-                });
-    
-    
-    
+        if (err) throw err;
+        var search = db.collection('search');
+        
+            search.find().limit(10).sort({unix: -1}).toArray(function (err, results) {
+            if (err) throw err;
+            
+//            
+                var arrayResult = [];
+            results.forEach(function(object){
+                
+            arrayResult.push({term: object.term, when: object.when});
+               
+            });
+//            
+//            return arrayResult;
+            res.end(JSON.stringify(arrayResult));
+        });
+
+        //res.end(JSON.stringify(d));
+    });
+
+
+
 });
 
 
