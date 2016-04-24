@@ -3,22 +3,17 @@ var app = express();
 var path = require("path");
 var google = require('googleapis');
 var customsearch = google.customsearch('v1');
-
 var mongodb = require('mongodb');
 
 app.set('port', (process.env.PORT || 5000));
 
 app.get("/", function (req, res) {
 
-
     res.sendFile(path.join(__dirname + '/index.html'));
-
 
 });
 //custom search API
-
-var uri = 'mongodb://romi103:casted12@ds013310.mlab.com:13310/heroku_j5p7jl9s';
-//var uri = process.env.PROD_MONGODB;
+var uri = process.env.PROD_MONGODB;
 
 app.get('/search/:se', function (req, res) {
 
@@ -37,9 +32,6 @@ app.get('/search/:se', function (req, res) {
             res.send('Encountered error', err);
         } else {
 
-            console.log(uri);
-            //            var d = new Data();
-            //            var dataSearch = d.toUTCString();
             var dataToDatbase = {
                 term: request,
                 when: new Date().toUTCString(),
@@ -84,34 +76,26 @@ app.get('/latest', function (req, res) {
 
         if (err) throw err;
         var search = db.collection('search');
-        
-            search.find().limit(10).sort({unix: -1}).toArray(function (err, results) {
+
+        search.find().limit(10).sort({
+            unix: -1
+        }).toArray(function (err, results) {
             if (err) throw err;
-            
-//            
-                var arrayResult = [];
-            results.forEach(function(object){
-                
-            arrayResult.push({term: object.term, when: object.when});
-               
+
+            var arrayResult = [];
+            results.forEach(function (object) {
+
+                arrayResult.push({
+                    term: object.term,
+                    when: object.when
+                });
+
             });
-//            
-//            return arrayResult;
             res.end(JSON.stringify(arrayResult));
         });
 
-        //res.end(JSON.stringify(d));
     });
-
-
-
 });
-
-
-
-
-
-
 
 app.listen(app.get('port'), function () {
     console.log('Example app listening on port', app.get('port'));
